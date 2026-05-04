@@ -917,6 +917,21 @@ app.addEventListener("click", (event) => {
   }
 
   if (action === "opinion-submit") {
+    const issue = issueById(state.currentIssueId);
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+    activities.unshift({
+      id: "vote-" + Date.now(),
+      title: issue.title,
+      status: "Under review",
+      statusColor: "#be185d",
+      statusBg: "#fce7f3",
+      updated: "Updated today",
+      category: issue.category,
+      submitted: dateStr
+    });
+
     state.activityTab = "All";
     showToast("Your opinion was submitted and added to My activity.");
     routeTo("activity");
@@ -959,6 +974,21 @@ app.addEventListener("click", (event) => {
   }
 
   if (action === "proposal-publish") {
+    const category = proposalCategories.find((item) => item.id === state.proposal.category);
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+    activities.unshift({
+      id: "prop-" + Date.now(),
+      title: state.proposal.title,
+      status: "Under review",
+      statusColor: "#be185d",
+      statusBg: "#fce7f3",
+      updated: "Updated today",
+      category: category.label,
+      submitted: dateStr
+    });
+
     state.proposalStep = 5;
     render();
   }
