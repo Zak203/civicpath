@@ -1,0 +1,9 @@
+{
+  "name": "civic-path-poc",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node server.js",
+    "render:pdf": "swift -module-cache-path .swift-module-cache scripts/render-pdf.swift \"${PDF_PATH:-/Users/zakk/Downloads/Blue Modern Mobile Application Presentation-8.pdf}\" public/screens"
+  }
+}
