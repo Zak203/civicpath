@@ -104,8 +104,8 @@ const activities = [
     id: "crosswalk",
     title: "Safer crosswalk near the school",
     status: "Under review",
-    statusColor: "#f3a21b",
-    statusBg: "#fff1d8",
+    statusColor: "#be185d",
+    statusBg: "#fce7f3",
     updated: "Updated today",
     category: "Mobility",
     submitted: "Apr 12"
@@ -114,8 +114,8 @@ const activities = [
     id: "parking",
     title: "More bike parking at the station",
     status: "In progress",
-    statusColor: "#2f6fdb",
-    statusBg: "#e9f4ff",
+    statusColor: "#4f46e5",
+    statusBg: "#eef2ff",
     updated: "Updated 3 days ago",
     category: "Mobility",
     submitted: "Apr 4"
@@ -124,8 +124,8 @@ const activities = [
     id: "lighting",
     title: "Better lighting on Main Street",
     status: "Decided",
-    statusColor: "#1f9d51",
-    statusBg: "#e6f7ed",
+    statusColor: "#047857",
+    statusBg: "#d1fae5",
     updated: "Decided on Feb 10",
     category: "Public spaces",
     submitted: "Jan 28"
@@ -149,7 +149,8 @@ const state = {
   opinionStep: 1,
   opinion: {
     stance: "support",
-    reason: ""
+    reason: "",
+    suggestion: ""
   },
   proposalStep: 1,
   proposal: {
@@ -242,7 +243,6 @@ function statusBar() {
 function bottomNav(active) {
   const items = [
     ["home", "Home", "home", "home"],
-    ["welcome", "Topics", "star", "topics"],
     ["activity", "My activity", "activity", "activity"],
     ["propose", "Propose", "plus", "propose"],
     ["profile", "Profile", "profile", "profile"]
@@ -326,7 +326,6 @@ function welcomeScreen() {
 function header(title = "Hello Karim") {
   return `
     <header class="header">
-      <button class="brand-link" data-action="nav" data-route="welcome" type="button">CivicPath</button>
       <div class="top-row">
         <div>
           <h1 class="hello">${title}</h1>
@@ -357,9 +356,9 @@ function issueCard(issue) {
       <span>
         <span class="issue-tag">${issue.category}</span>
         <strong class="issue-title">${issue.title}</strong>
-        <span class="issue-meta"><span>${issue.votes} votes</span><span>${issue.days} days left</span></span>
+        <span class="issue-meta"><span>${issue.votes} votes</span><span class="dot">&bull;</span><span>${issue.days} days left</span></span>
       </span>
-      <span class="issue-symbol">${icon(issue.icon, 29)}</span>
+      <span class="issue-symbol">${icon(issue.icon, 32)}</span>
     </button>
   `;
 }
@@ -444,7 +443,7 @@ function detailScreen() {
         </div>
         <div class="detail-section">
           <h2>Process</h2>
-          ${processStepper(["Consultation", "Analysis", "Decision", "Implementation"], issue.phase)}
+          ${processStepper(["Consultation", "Analysis", "Decision", "Implementation"], issue.phase, false, "green")}
         </div>
       </section>
       <button class="primary-button" data-action="opinion" data-issue="${issue.id}" type="button">Give my opinion</button>
@@ -453,21 +452,20 @@ function detailScreen() {
   );
 }
 
-function processStepper(labels, activeLabel, hideLabels = false) {
+function processStepper(labels, activeLabel, hideLabels = false, color = "purple") {
   const activeIndex = Math.max(0, labels.indexOf(activeLabel));
   return `
-    <div class="stepper" style="--steps:${labels.length}">
+    <div class="stepper stepper-${color}" style="--steps:${labels.length}">
       ${labels
         .map((label, index) => `
-          <span class="step-dot ${index < activeIndex ? "done" : ""} ${index === activeIndex ? "active" : ""}">
-            <span>${index + 1}</span>
-          </span>
+          <div class="step ${index < activeIndex ? "done" : ""} ${index === activeIndex ? "active" : ""}">
+            ${index === 0 ? "" : '<span class="step-line"></span>'}
+            <span class="step-dot"></span>
+            ${hideLabels ? "" : `<span class="step-label">${label}</span>`}
+          </div>
         `)
         .join("")}
     </div>
-    ${hideLabels ? "" : `<div class="filter-row">
-      ${labels.map((label, index) => `<span class="chip ${index === activeIndex ? "active" : ""}">${label}</span>`).join("")}
-    </div>`}
   `;
 }
 
@@ -489,6 +487,8 @@ function opinionScreen() {
                 ${opinionChoice("concerns", "I have concerns", "I support with some conditions.")}
                 ${opinionChoice("oppose", "I do not support", "I don't think this is a good idea.")}
               </div>
+              <h2 class="form-title" style="margin-top:18px">Why?</h2>
+              <textarea class="text-area" data-field="opinion.reason" placeholder="Share your thoughts (optional)">${escapeHtml(state.opinion.reason)}</textarea>
               <div class="wizard-actions single">
                 <button class="primary-button purple" data-action="opinion-next" type="button">Next</button>
               </div>
@@ -498,8 +498,9 @@ function opinionScreen() {
         ${
           state.opinionStep === 2
             ? `
-              <h2 class="form-title">Why?</h2>
-              <textarea class="text-area" data-field="opinion.reason" placeholder="Share your thoughts optional">${escapeHtml(state.opinion.reason)}</textarea>
+              <h2 class="form-title">Add details</h2>
+              <p class="field-label">Optional - add a suggestion or extra context.</p>
+              <textarea class="text-area" data-field="opinion.suggestion" placeholder="Suggest an alternative or add context (optional)">${escapeHtml(state.opinion.suggestion || "")}</textarea>
               <div class="wizard-actions">
                 <button class="secondary-button" data-action="opinion-back" type="button">${icon("arrowLeft", 16)} Back</button>
                 <button class="primary-button purple" data-action="opinion-next" type="button">Next ${icon("arrowRight", 16)}</button>
@@ -743,6 +744,10 @@ function activityScreen() {
 }
 
 function activityCard(activity) {
+  const isDecided = activity.status === "Decided";
+  const indicator = isDecided
+    ? `<span class="decided-check" aria-hidden="true">${icon("check", 14)}</span>`
+    : `<span class="chevron">${icon("arrowRight", 18)}</span>`;
   return `
     <button class="activity-card" style="--status-color:${activity.statusColor};--status-bg:${activity.statusBg};" data-action="open-activity" data-activity="${activity.id}" type="button">
       <span>
@@ -750,7 +755,7 @@ function activityCard(activity) {
         <h3>${activity.title}</h3>
         <p>${activity.updated}</p>
       </span>
-      <span class="chevron">${icon("arrowRight", 18)}</span>
+      ${indicator}
     </button>
   `;
 }
