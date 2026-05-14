@@ -141,6 +141,9 @@ const proposalCategories = [
   { id: "other", label: "Other", icon: "more", color: "#858d9b", soft: "#f1f3f6" }
 ];
 
+const ONBOARDING_KEY = "civicpath_onboarded";
+const onboardingDone = () => localStorage.getItem(ONBOARDING_KEY) === "1";
+
 const state = {
   route: parseRoute(),
   selectedTopics: new Set(["mobility", "schools", "commerce"]),
@@ -163,12 +166,31 @@ const state = {
   },
   activityTab: "All",
   currentActivityId: "crosswalk",
-  toast: ""
+  toast: "",
+  onboarding: {
+    step: 0, // 0=splash 1=identity 2=address 3=notifications 4=success
+    firstName: "",
+    lastName: "",
+    age: 32,
+    street: "",
+    city: "",
+    postalCode: "",
+    neighbourhood: "",
+    notifAlerts: true,
+    notifVotes: true,
+    notifNews: false
+  }
 };
+
 
 function parseRoute() {
   const raw = window.location.hash.replace(/^#/, "");
-  if (!raw || raw.startsWith("page-")) return "welcome";
+  // Only redirect empty hash to onboarding (or home)
+  if (!raw || raw.startsWith("page-")) {
+    return onboardingDone() ? "home" : "onboarding";
+  }
+  // No hash at all → onboarding first time, home after
+  if (raw === "onboarding" && onboardingDone()) return "home";
   return raw;
 }
 
@@ -802,30 +824,62 @@ function timelineItem(title, text, date, status, note = "") {
 }
 
 function profileScreen() {
+  const ob = state.onboarding;
+  const fullName = [ob.firstName, ob.lastName].filter(Boolean).join(" ") || "Citoyen";
+  const address = [ob.street, ob.postalCode, ob.city].filter(Boolean).join(", ") || "Non renseignée";
+  const neighbourhood = ob.neighbourhood || ob.city || "Non renseigné";
+
+  function toggle(field, on) {
+    return `<button class="switch" data-action="ob-toggle" data-field="${field}" type="button" aria-pressed="${on}" style="${on ? "" : "background:#d0d5de"}"></button>`;
+  }
+
   return screen(
     `
-      ${header("Profile")}
+      ${header("Mon profil")}
+
+      <div class="ob-summary-card" style="margin-bottom:16px">
+        <div class="ob-summary-row">
+          <span class="ob-summary-icon" style="background:#e8f3ff;color:#2f6fdb">${icon("profile", 18)}</span>
+          <div class="ob-summary-text">
+            <strong>${escapeHtml(fullName)}</strong>
+            <span>${ob.age} ans</span>
+          </div>
+        </div>
+        <div class="ob-summary-row">
+          <span class="ob-summary-icon" style="background:#edf8e6;color:#58a02a">${icon("mapPin", 18)}</span>
+          <div class="ob-summary-text">
+            <strong>${escapeHtml(neighbourhood)}</strong>
+            <span>${escapeHtml(address)}</span>
+          </div>
+        </div>
+      </div>
+
       <section class="profile-card">
         <div class="profile-row">
-          <span><strong>Neighborhood</strong><span>Sous-Gare neighborhood</span></span>
-          ${icon("mapPin", 20)}
+          <span><strong>Sujets suivis</strong><span>${state.selectedTopics.size} sélectionnés</span></span>
+          <button class="ghost-button" data-action="nav" data-route="welcome" type="button">Modifier</button>
         </div>
         <div class="profile-row">
-          <span><strong>Tracked topics</strong><span>${state.selectedTopics.size} selected</span></span>
-          <button class="ghost-button" data-action="nav" data-route="welcome" type="button">Edit</button>
+          <span><strong>Alertes de vote</strong><span>Consultations en cours</span></span>
+          ${toggle("notifAlerts", ob.notifAlerts)}
         </div>
         <div class="profile-row">
-          <span><strong>Progress updates</strong><span>Receive status changes and decisions</span></span>
-          <span class="switch" aria-hidden="true"></span>
+          <span><strong>Décisions &amp; résultats</strong><span>Mises à jour sur tes propositions</span></span>
+          ${toggle("notifVotes", ob.notifVotes)}
         </div>
         <div class="profile-row">
-          <span><strong>Level 1 Observer</strong><span>Read 2 more issues to unlock voting</span></span>
+          <span><strong>Actualités du quartier</strong><span>Nouveaux projets près de chez toi</span></span>
+          ${toggle("notifNews", ob.notifNews)}
+        </div>
+        <div class="profile-row">
+          <span><strong>Level 1 Observer</strong><span>Lis 2 sujets de plus pour débloquer le vote</span></span>
           ${icon("eye", 20)}
         </div>
       </section>
+
       <div class="read-progress" style="margin-top:16px">
         <div class="read-progress-row">
-          <span>Read issues to unlock voting</span>
+          <span>Lire des sujets pour débloquer le vote</span>
           <span>2 / 5</span>
         </div>
         <div class="progress-bar"><span style="width:40%"></span></div>
@@ -835,9 +889,211 @@ function profileScreen() {
   );
 }
 
+/* ─── ONBOARDING SCREENS ──────────────────────────────────── */
+
+function obProgress(active) {
+  // 4 steps: identity(1) address(2) notifs(3) success(4)
+  return `<div class="ob-progress" aria-hidden="true">
+    ${[1,2,3,4].map(i => `<span class="ob-step-dot ${i < active ? 'done' : i === active ? 'active' : ''}"></span>`).join('')}
+  </div>`;
+}
+
+function onboardingSplashScreen() {
+  return `<div class="ob-screen ob-splash">
+    <div class="ob-splash-logo">
+      ${icon('mapPin', 40)}
+    </div>
+    <h1>CivicPath</h1>
+    <p>Rejoins ta communauté.<br>Participe aux décisions qui façonnent ton quartier.</p>
+    <button class="ob-splash-btn" data-action="ob-start" type="button" id="ob-splash-btn">
+      Créer mon compte ${icon('arrowRight', 18)}
+    </button>
+    <p class="ob-splash-hint">Prend moins de 2 minutes</p>
+  </div>`;
+}
+
+function onboardingStep1Screen() {
+  const ob = state.onboarding;
+  return `<div class="ob-screen">
+    ${obProgress(1)}
+    <div class="ob-body">
+      <p class="ob-step-label">Étape 1 sur 3</p>
+      <h1 class="ob-title">Qui es-tu ?</h1>
+      <p class="ob-subtitle">Ces infos restent privées et servent uniquement à personnaliser ton expérience.</p>
+
+      <div class="ob-input-row">
+        <div class="ob-field">
+          <label for="ob-firstname">Prénom</label>
+          <input id="ob-firstname" class="ob-input" data-ob="firstName" type="text" placeholder="Ex. Karim" value="${escapeHtml(ob.firstName)}" autocomplete="given-name">
+        </div>
+        <div class="ob-field">
+          <label for="ob-lastname">Nom</label>
+          <input id="ob-lastname" class="ob-input" data-ob="lastName" type="text" placeholder="Ex. Benali" value="${escapeHtml(ob.lastName)}" autocomplete="family-name">
+        </div>
+      </div>
+
+      <div class="ob-field">
+        <label>Ton âge</label>
+        <div class="ob-age-row">
+          <button class="ob-age-btn" data-action="ob-age" data-dir="-1" type="button" aria-label="Diminuer l'âge">−</button>
+          <div>
+            <div class="ob-age-value" id="ob-age-display">${ob.age}</div>
+            <div class="ob-age-unit">ans</div>
+          </div>
+          <button class="ob-age-btn" data-action="ob-age" data-dir="1" type="button" aria-label="Augmenter l'âge">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="ob-footer">
+      <button class="ob-btn-primary" data-action="ob-next" type="button" id="ob-step1-next">Continuer ${icon('arrowRight', 18)}</button>
+    </div>
+  </div>`;
+}
+
+function onboardingStep2Screen() {
+  const ob = state.onboarding;
+  return `<div class="ob-screen">
+    ${obProgress(2)}
+    <div class="ob-body">
+      <p class="ob-step-label">Étape 2 sur 3</p>
+      <h1 class="ob-title">Où habites-tu ?</h1>
+      <p class="ob-subtitle">Ton adresse nous permet de t'afficher les actualités de ton quartier.</p>
+
+      <div class="ob-field">
+        <label for="ob-street">Rue et numéro</label>
+        <input id="ob-street" class="ob-input" data-ob="street" type="text" placeholder="Ex. 14 rue des Alpes" value="${escapeHtml(ob.street)}" autocomplete="street-address">
+      </div>
+
+      <div class="ob-input-row">
+        <div class="ob-field">
+          <label for="ob-postal">Code postal</label>
+          <input id="ob-postal" class="ob-input" data-ob="postalCode" type="text" placeholder="1000" value="${escapeHtml(ob.postalCode)}" autocomplete="postal-code" inputmode="numeric">
+        </div>
+        <div class="ob-field">
+          <label for="ob-city">Ville</label>
+          <input id="ob-city" class="ob-input" data-ob="city" type="text" placeholder="Lausanne" value="${escapeHtml(ob.city)}" autocomplete="address-level2">
+        </div>
+      </div>
+
+      <div class="ob-field">
+        <label for="ob-neighbourhood">Quartier</label>
+        <input id="ob-neighbourhood" class="ob-input" data-ob="neighbourhood" type="text" placeholder="Ex. Sous-Gare, Bellevaux…" value="${escapeHtml(ob.neighbourhood)}">
+      </div>
+    </div>
+    <div class="ob-footer">
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:9px">
+        <button class="secondary-button" data-action="ob-back" type="button" style="min-width:52px;border-radius:12px">${icon('arrowLeft', 18)}</button>
+        <button class="ob-btn-primary" data-action="ob-next" type="button" id="ob-step2-next">Continuer ${icon('arrowRight', 18)}</button>
+      </div>
+      <button class="ob-btn-skip" data-action="ob-next" type="button">Passer cette étape</button>
+    </div>
+  </div>`;
+}
+
+function onboardingStep3Screen() {
+  const ob = state.onboarding;
+  function toggle(field, on) {
+    return `<button class="ob-toggle ${on ? 'on' : ''}" data-action="ob-toggle" data-field="${field}" type="button" aria-pressed="${on}" aria-label="Activer/désactiver"></button>`;
+  }
+  return `<div class="ob-screen">
+    ${obProgress(3)}
+    <div class="ob-body">
+      <p class="ob-step-label">Étape 3 sur 3</p>
+      <h1 class="ob-title">Tes notifications</h1>
+      <p class="ob-subtitle">Reste informé des sujets qui te concernent. Tu peux modifier ça plus tard.</p>
+
+      <div class="ob-notif-card">
+        <div class="ob-notif-row">
+          <div class="ob-notif-info">
+            <strong>${icon('bell', 15)} Alertes de vote</strong>
+            <span>Quand un sujet que tu suis passe en consultation</span>
+          </div>
+          ${toggle('notifAlerts', ob.notifAlerts)}
+        </div>
+        <div class="ob-divider"></div>
+        <div class="ob-notif-row">
+          <div class="ob-notif-info">
+            <strong>${icon('check', 15)} Décisions &amp; résultats</strong>
+            <span>Quand une décision est prise sur tes propositions</span>
+          </div>
+          ${toggle('notifVotes', ob.notifVotes)}
+        </div>
+        <div class="ob-divider"></div>
+        <div class="ob-notif-row">
+          <div class="ob-notif-info">
+            <strong>${icon('document', 15)} Actualités du quartier</strong>
+            <span>Nouveaux projets et sujets près de chez toi</span>
+          </div>
+          ${toggle('notifNews', ob.notifNews)}
+        </div>
+      </div>
+    </div>
+    <div class="ob-footer">
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:9px">
+        <button class="secondary-button" data-action="ob-back" type="button" style="min-width:52px;border-radius:12px">${icon('arrowLeft', 18)}</button>
+        <button class="ob-btn-primary" data-action="ob-finish" type="button" id="ob-step3-next">Créer mon compte ${icon('check', 18)}</button>
+      </div>
+      <button class="ob-btn-skip" data-action="ob-finish" type="button">Tout refuser</button>
+    </div>
+  </div>`;
+}
+
+function onboardingSuccessScreen() {
+  const ob = state.onboarding;
+  const name = ob.firstName || "Citoyen";
+  const addr = ob.neighbourhood || ob.city || "ton quartier";
+  const notifCount = [ob.notifAlerts, ob.notifVotes, ob.notifNews].filter(Boolean).length;
+  return `<div class="ob-screen">
+    <div class="ob-body" style="display:flex;flex-direction:column;align-items:stretch">
+      <div class="ob-avatar">${icon('profile', 34)}</div>
+      <h1 class="ob-success-title">Bienvenue, ${escapeHtml(name)} ! 🎉</h1>
+      <p class="ob-success-sub">Ton compte CivicPath est prêt.<br>Tu es connecté à <strong>${escapeHtml(addr)}</strong>.</p>
+
+      <div class="ob-summary-card">
+        <div class="ob-summary-row">
+          <span class="ob-summary-icon" style="background:#e8f3ff;color:#2f6fdb">${icon('profile', 18)}</span>
+          <div class="ob-summary-text">
+            <strong>${escapeHtml(ob.firstName || '–')} ${escapeHtml(ob.lastName || '')}</strong>
+            <span>${ob.age} ans</span>
+          </div>
+        </div>
+        <div class="ob-summary-row">
+          <span class="ob-summary-icon" style="background:#edf8e6;color:#58a02a">${icon('mapPin', 18)}</span>
+          <div class="ob-summary-text">
+            <strong>${escapeHtml(ob.neighbourhood || ob.city || 'Non renseigné')}</strong>
+            <span>${escapeHtml([ob.street, ob.postalCode, ob.city].filter(Boolean).join(', ') || 'Adresse non renseignée')}</span>
+          </div>
+        </div>
+        <div class="ob-summary-row">
+          <span class="ob-summary-icon" style="background:#fff3df;color:#f7a11f">${icon('bell', 18)}</span>
+          <div class="ob-summary-text">
+            <strong>Notifications</strong>
+            <span>${notifCount} type${notifCount > 1 ? 's' : ''} activé${notifCount > 1 ? 's' : ''}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ob-footer">
+      <button class="ob-btn-primary" data-action="ob-enter-app" type="button" id="ob-enter-app">Accéder à l'app ${icon('arrowRight', 18)}</button>
+    </div>
+  </div>`;
+}
+
+function onboardingScreen() {
+  const step = state.onboarding.step;
+  if (step === 0) return onboardingSplashScreen();
+  if (step === 1) return onboardingStep1Screen();
+  if (step === 2) return onboardingStep2Screen();
+  if (step === 3) return onboardingStep3Screen();
+  return onboardingSuccessScreen();
+}
+
+/* ─── RENDER ──────────────────────────────────────────────── */
+
 function render() {
   const route = state.route;
   const routeMap = {
+    onboarding: onboardingScreen,
     welcome: welcomeScreen,
     home: homeScreen,
     issue: detailScreen,
@@ -848,7 +1104,7 @@ function render() {
     profile: profileScreen
   };
 
-  const renderer = routeMap[route] || welcomeScreen;
+  const renderer = routeMap[route] || (onboardingDone() ? homeScreen : onboardingScreen);
   app.innerHTML = renderer();
   document.title = `CivicPath - ${route}`;
 }
@@ -868,6 +1124,45 @@ app.addEventListener("click", (event) => {
   if (!target) return;
 
   const action = target.dataset.action;
+
+  // ── Onboarding actions ──────────────────────────────────
+  if (action === "ob-start") {
+    state.onboarding.step = 1;
+    render();
+  }
+
+  if (action === "ob-age") {
+    const dir = parseInt(target.dataset.dir, 10);
+    state.onboarding.age = Math.min(120, Math.max(13, state.onboarding.age + dir));
+    render();
+  }
+
+  if (action === "ob-toggle") {
+    const field = target.dataset.field;
+    state.onboarding[field] = !state.onboarding[field];
+    render();
+  }
+
+  if (action === "ob-back") {
+    state.onboarding.step = Math.max(0, state.onboarding.step - 1);
+    render();
+  }
+
+  if (action === "ob-next") {
+    state.onboarding.step = Math.min(4, state.onboarding.step + 1);
+    render();
+  }
+
+  if (action === "ob-finish") {
+    state.onboarding.step = 4;
+    render();
+  }
+
+  if (action === "ob-enter-app") {
+    localStorage.setItem(ONBOARDING_KEY, "1");
+    routeTo("welcome");
+  }
+  // ────────────────────────────────────────────────────────
 
   if (action === "toggle-topic") {
     const id = target.dataset.topic;
@@ -1009,6 +1304,13 @@ app.addEventListener("click", (event) => {
 });
 
 app.addEventListener("input", (event) => {
+  // Onboarding inputs use data-ob attribute
+  const obField = event.target.dataset.ob;
+  if (obField) {
+    state.onboarding[obField] = event.target.value;
+    return;
+  }
+
   const field = event.target.dataset.field;
   if (!field) return;
 
