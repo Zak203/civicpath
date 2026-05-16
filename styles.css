@@ -460,6 +460,32 @@ p {
   display: none;
 }
 
+.sort-row {
+  display: flex;
+  gap: 16px;
+  padding: 0 0 16px;
+  align-items: center;
+}
+
+.sort-chip {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 150ms ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.sort-chip.active {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+
 .chip {
   flex: 0 0 auto;
   min-height: 28px;
@@ -1696,39 +1722,63 @@ body {
   gap: 10px;
 }
 
-/* Age stepper */
-.ob-age-row {
+/* Age stepper — vertical layout */
+.ob-age-col {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 6px;
+  width: fit-content;
 }
 
 .ob-age-btn {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border: 1.5px solid #dbe0e8;
   border-radius: 50%;
   background: #f7f9fd;
   color: var(--ink);
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   cursor: pointer;
   display: grid;
   place-items: center;
-  transition: background 120ms ease;
+  transition: background 120ms ease, transform 100ms ease;
   flex: 0 0 auto;
+  line-height: 1;
 }
 
 .ob-age-btn:active {
   background: #e0e8f8;
+  transform: scale(0.92);
 }
 
+/* Visible boxed input */
 .ob-age-value {
-  flex: 1;
+  width: 80px;
   text-align: center;
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 950;
   color: var(--blue);
+  border: 2px solid #dbe0e8;
+  border-radius: 14px;
+  background: #f7f9ff;
+  outline: none;
+  padding: 10px 0;
+  line-height: 1.1;
+  -moz-appearance: textfield;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.ob-age-value:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(47,111,219,0.13);
+}
+
+.ob-age-value::-webkit-outer-spin-button,
+.ob-age-value::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .ob-age-unit {
@@ -1736,8 +1786,10 @@ body {
   font-weight: 750;
   color: var(--muted);
   text-align: center;
-  margin-top: 2px;
+  margin-top: 0;
 }
+
+
 
 /* Notification card */
 .ob-notif-card {

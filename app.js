@@ -3,7 +3,7 @@ const app = document.querySelector("#app");
 const topics = [
   {
     id: "mobility",
-    label: "Traffic & mobility",
+    label: "Mobility",
     count: 7,
     color: "#2f86dd",
     soft: "#e6f2ff",
@@ -11,53 +11,54 @@ const topics = [
     icon: "bus"
   },
   {
-    id: "schools",
-    label: "Schools & kids",
-    count: 3,
-    color: "#5f9e22",
-    soft: "#eef8e6",
-    muted: "#b7d88b",
-    icon: "school"
-  },
-  {
-    id: "parks",
-    label: "Parks & nature",
+    id: "environment",
+    label: "Environment",
     count: 5,
-    color: "#9cc75d",
-    soft: "#f1f8e6",
-    muted: "#c9e49b",
+    color: "#1f9d51",
+    soft: "#e7f6e9",
+    muted: "#8bd0a5",
     icon: "leaf"
   },
   {
-    id: "commerce",
-    label: "Local commerce",
-    count: 2,
-    color: "#f4a01f",
-    soft: "#fff3df",
-    muted: "#f8bf61",
+    id: "spaces",
+    label: "Public spaces",
+    count: 4,
+    color: "#f47a22",
+    soft: "#fff0e7",
+    muted: "#f9b788",
     icon: "building"
   },
   {
-    id: "housing",
-    label: "Housing",
-    count: 4,
-    color: "#8c8c8c",
-    soft: "#f4f4f4",
-    muted: "#b6b6b6",
-    icon: "home"
+    id: "economy",
+    label: "Local economy",
+    count: 3,
+    color: "#5630bd",
+    soft: "#f1ebff",
+    muted: "#b09ae0",
+    icon: "wallet"
   },
   {
-    id: "budget",
-    label: "Budget & finance",
+    id: "culture",
+    label: "Culture & events",
+    count: 2,
+    color: "#f3b51c",
+    soft: "#fff7dd",
+    muted: "#f8d88c",
+    icon: "star"
+  },
+  {
+    id: "other",
+    label: "Other",
     count: 1,
-    color: "#0d9b76",
-    soft: "#e6f7f2",
-    muted: "#7ed4bd",
-    icon: "wallet"
+    color: "#858d9b",
+    soft: "#f1f3f6",
+    muted: "#c0c5cd",
+    icon: "more"
   }
 ];
 
 const issues = [
+  // ── Mobility ──────────────────────────────────────────────
   {
     id: "bus",
     topic: "mobility",
@@ -66,27 +67,68 @@ const issues = [
     votes: 142,
     days: 12,
     icon: "bus",
-    body: "Many residents experience long waiting times during peak hours.",
+    body: "Many residents experience long waiting times during peak hours on line 4, especially between the station and the hospital.",
     objectives: ["Reduce waiting times", "Improve reliability", "Encourage public transport use"],
     done: "The city analysed data and identified peak-time gaps.",
     phase: "Consultation"
   },
   {
+    id: "crosswalk-school",
+    topic: "mobility",
+    category: "Mobility",
+    title: "Safer crosswalk near Rousseau Primary School",
+    votes: 119,
+    days: 3,
+    icon: "bus",
+    body: "Parents and teachers have raised concerns about a dangerous crossing on Avenue des Alpes with no traffic lights and poor visibility.",
+    objectives: ["Protect children", "Add pedestrian signals", "Reduce vehicle speed"],
+    done: "A traffic safety audit has been requested.",
+    phase: "Analysis"
+  },
+  {
+    id: "bike-lanes",
+    topic: "mobility",
+    category: "Mobility",
+    title: "Extend bike lanes to the city centre",
+    votes: 87,
+    days: 19,
+    icon: "bus",
+    body: "Cyclists currently have no protected path between the Sous-Gare district and Place de la Riponne, forcing them onto busy roads.",
+    objectives: ["Safer cycling routes", "Reduce car traffic", "Connect districts"],
+    done: "Two route options have been mapped by the urban planning team.",
+    phase: "Consultation"
+  },
+  // ── Environment ───────────────────────────────────────────
+  {
     id: "garden",
-    topic: "parks",
+    topic: "environment",
     category: "Environment",
     title: "Create a new community garden",
     votes: 98,
     days: 5,
     icon: "leaf",
-    body: "Residents proposed converting an unused lot into a garden with shared plots, seating and a small learning area.",
+    body: "Residents proposed converting an unused lot on Rue du Nord into a garden with shared plots, seating and a small learning area for children.",
     objectives: ["Bring neighbours together", "Add green space", "Support local biodiversity"],
     done: "A first location check has been completed.",
     phase: "Analysis"
   },
   {
+    id: "park-renovation",
+    topic: "environment",
+    category: "Environment",
+    title: "Renovate Parc de la Jeunesse",
+    votes: 73,
+    days: 22,
+    icon: "leaf",
+    body: "The playground equipment is outdated and unsafe. Families are asking for modern, inclusive play structures and better lighting for evening use.",
+    objectives: ["Safer playground", "Inclusive design", "Improve lighting"],
+    done: "Budget has been allocated for a feasibility study.",
+    phase: "Analysis"
+  },
+  // ── Public spaces ─────────────────────────────────────────
+  {
     id: "square",
-    topic: "commerce",
+    topic: "spaces",
     category: "Public spaces",
     title: "Reimagine the central square",
     votes: 76,
@@ -96,8 +138,129 @@ const issues = [
     objectives: ["Make walking easier", "Support local shops", "Improve seating areas"],
     done: "A draft concept is open for public comments.",
     phase: "Consultation"
+  },
+  {
+    id: "social-housing",
+    topic: "spaces",
+    category: "Public spaces",
+    title: "Build 80 new affordable housing units",
+    votes: 110,
+    days: 45,
+    icon: "home",
+    body: "Rising rents are pushing residents out of the city. A new development on the former industrial site could provide 80 affordable units within 3 years.",
+    objectives: ["Affordable rents", "Mixed-income community", "Reuse industrial land"],
+    done: "An architectural competition has been launched.",
+    phase: "Consultation"
+  },
+  {
+    id: "school-canteen",
+    topic: "spaces",
+    category: "Public spaces",
+    title: "Improve school canteen quality",
+    votes: 93,
+    days: 7,
+    icon: "school",
+    body: "Parents are asking for more balanced, locally sourced meals in school canteens, and a vegetarian option every day.",
+    objectives: ["Healthier meals", "Local sourcing", "Daily vegetarian option"],
+    done: "A pilot menu has been tested at two schools.",
+    phase: "Consultation"
+  },
+  // ── Local economy ─────────────────────────────────────────
+  {
+    id: "market",
+    topic: "economy",
+    category: "Local economy",
+    title: "Expand the weekly farmers' market",
+    votes: 61,
+    days: 14,
+    icon: "building",
+    body: "The Saturday market on Place de la Palud is popular but too small. Producers are turned away and residents want more local food options.",
+    objectives: ["Support local farmers", "Extend market hours", "Add covered stalls"],
+    done: "A survey of 40 local producers has been completed.",
+    phase: "Consultation"
+  },
+  {
+    id: "shop-vacancy",
+    topic: "economy",
+    category: "Local economy",
+    title: "Reduce empty storefronts in the old town",
+    votes: 47,
+    days: 25,
+    icon: "building",
+    body: "Over 15% of ground-floor retail spaces in the old town have been empty for more than a year. A rent subsidy programme would attract independent shops.",
+    objectives: ["Attract local businesses", "Revive street life", "Cut vacancy rates"],
+    done: "A mapping study of vacant spaces has been finalised.",
+    phase: "Analysis"
+  },
+  {
+    id: "participatory-budget",
+    topic: "economy",
+    category: "Local economy",
+    title: "Launch a participatory budget for 2026",
+    votes: 85,
+    days: 60,
+    icon: "wallet",
+    body: "Residents want a direct say in how CHF 500,000 of the municipal budget is spent. A participatory process would let citizens vote on local projects.",
+    objectives: ["Citizen-led decisions", "Transparent spending", "Fund community projects"],
+    done: "A working group of 12 residents has been formed.",
+    phase: "Consultation"
+  },
+  // ── Culture & events ──────────────────────────────────────
+  {
+    id: "open-stage",
+    topic: "culture",
+    category: "Culture & events",
+    title: "Create a free open-air stage in the park",
+    votes: 66,
+    days: 40,
+    icon: "star",
+    body: "Residents want a permanent outdoor stage in Parc de Mon-Repos for free concerts, theatre and community events throughout summer.",
+    objectives: ["Free cultural access", "Animate public space", "Support local artists"],
+    done: "Three park locations have been shortlisted by the culture office.",
+    phase: "Analysis"
+  },
+  {
+    id: "night-market",
+    topic: "culture",
+    category: "Culture & events",
+    title: "Launch a monthly night market",
+    votes: 52,
+    days: 35,
+    icon: "star",
+    body: "A monthly evening market with food stalls, live music and local crafts would animate the city centre and support small businesses on quiet nights.",
+    objectives: ["Boost local economy", "Animate the city at night", "Showcase local talent"],
+    done: "A pilot event has been scheduled for June.",
+    phase: "Consultation"
+  },
+  // ── Other ─────────────────────────────────────────────────
+  {
+    id: "afterschool",
+    topic: "other",
+    category: "Other",
+    title: "More after-school activity funding",
+    votes: 54,
+    days: 30,
+    icon: "school",
+    body: "Many working families struggle to afford after-school clubs. A subsidy programme would ensure all children have access to sports and arts activities.",
+    objectives: ["Reduce inequality", "Fund activity clubs", "Support working parents"],
+    done: "An equity impact report has been submitted to the council.",
+    phase: "Analysis"
+  },
+  {
+    id: "digital-services",
+    topic: "other",
+    category: "Other",
+    title: "Improve city's online services",
+    votes: 38,
+    days: 90,
+    icon: "document",
+    body: "Many administrative tasks still require a visit to the town hall. Digitising key services like permit requests and ID renewals would save residents hours each year.",
+    objectives: ["Save residents time", "Reduce paper waste", "Modernise administration"],
+    done: "A UX audit of the city website has been completed.",
+    phase: "Analysis"
   }
 ];
+
 
 const activities = [
   {
@@ -132,22 +295,16 @@ const activities = [
   }
 ];
 
-const proposalCategories = [
-  { id: "mobility", label: "Mobility", icon: "bus", color: "#2f86dd", soft: "#e6f2ff" },
-  { id: "environment", label: "Environment", icon: "leaf", color: "#1f9d51", soft: "#e7f6e9" },
-  { id: "spaces", label: "Public spaces", icon: "building", color: "#f47a22", soft: "#fff0e7" },
-  { id: "economy", label: "Local economy", icon: "wallet", color: "#5630bd", soft: "#f1ebff" },
-  { id: "culture", label: "Culture & events", icon: "star", color: "#f3b51c", soft: "#fff7dd" },
-  { id: "other", label: "Other", icon: "more", color: "#858d9b", soft: "#f1f3f6" }
-];
+
 
 const ONBOARDING_KEY = "civicpath_onboarded";
 const onboardingDone = () => localStorage.getItem(ONBOARDING_KEY) === "1";
 
 const state = {
   route: parseRoute(),
-  selectedTopics: new Set(["mobility", "schools", "commerce"]),
+  selectedTopics: new Set(["mobility", "environment", "economy"]),
   activeFilter: "All",
+  activeSort: "Trending",
   currentIssueId: "bus",
   opinionStep: 1,
   opinion: {
@@ -308,10 +465,10 @@ function welcomeScreen() {
   const selectedLabels = topics
     .filter((topic) => state.selectedTopics.has(topic.id))
     .map((topic) => {
-      if (topic.id === "mobility") return "Traffic";
-      if (topic.id === "schools") return "Schools";
-      if (topic.id === "commerce") return "Commerce";
-      return topic.label.split(" ")[0];
+      if (topic.id === "spaces") return "Public spaces";
+      if (topic.id === "economy") return "Local economy";
+      if (topic.id === "culture") return "Culture";
+      return topic.label;
     })
     .join(" &bull; ");
 
@@ -360,10 +517,10 @@ function header(title = "Hello Karim") {
 }
 
 function filters() {
-  const filterLabels = ["All", "Mobility", "Environment", "Public spaces"];
+  const categories = ["All", ...new Set(issues.map(i => i.category))];
   return `
     <div class="filter-row" aria-label="Issue filters">
-      ${filterLabels
+      ${categories
         .map((label) => `
           <button class="chip ${state.activeFilter === label ? "active" : ""}" data-action="filter" data-filter="${label}" type="button">${label}</button>
         `)
@@ -371,6 +528,7 @@ function filters() {
     </div>
   `;
 }
+
 
 function issueCard(issue) {
   return `
@@ -386,10 +544,36 @@ function issueCard(issue) {
 }
 
 function filteredIssues() {
-  return issues.filter((issue) => {
+  let list = issues.filter((issue) => {
     if (state.activeFilter !== "All" && issue.category !== state.activeFilter) return false;
     return true;
   });
+
+  if (state.activeSort === "Trending") {
+    list.sort((a, b) => b.votes - a.votes);
+  } else if (state.activeSort === "Ending soon") {
+    list.sort((a, b) => a.days - b.days);
+  } else if (state.activeSort === "Recent") {
+    // For mock data, we just reverse the array to simulate "newest first" or leave as is.
+    // Let's assume the array is ordered randomly, we can just sort by title length or something deterministic
+    // Or actually, just no-op or reverse. Let's do a deterministic sort for 'recent' based on ID for consistency.
+    list.sort((a, b) => b.id.localeCompare(a.id));
+  }
+
+  return list;
+}
+
+function sortControls() {
+  const options = ["Trending", "Recent", "Ending soon"];
+  return `
+    <div class="sort-row" aria-label="Sort options">
+      ${options.map(opt => `
+        <button class="sort-chip ${state.activeSort === opt ? "active" : ""}" data-action="sort" data-sort="${opt}" type="button">
+          ${opt}
+        </button>
+      `).join("")}
+    </div>
+  `;
 }
 
 function homeScreen() {
@@ -403,6 +587,7 @@ function homeScreen() {
           <button class="header-link" data-action="filter" data-filter="All" type="button">See all</button>
         </div>
         ${filters()}
+        ${sortControls()}
         <div class="issue-list">
           ${list.map(issueCard).join("")}
         </div>
@@ -615,7 +800,7 @@ function proposalStepContent(step) {
       <h2 class="form-title">Step 1 - Choose a category</h2>
       <p class="field-label">In which area does your idea fit best?</p>
       <div class="choice-list">
-        ${proposalCategories
+        ${topics
           .map((category) => `
             <button class="choice category-option ${state.proposal.category === category.id ? "selected" : ""}" style="--option-color:${category.color};--option-soft:${category.soft};" data-action="proposal-category" data-category="${category.id}" type="button">
               <span class="small-icon">${icon(category.icon, 17)}</span>
@@ -681,7 +866,7 @@ function proposalStepContent(step) {
   }
 
   if (step === 4) {
-    const category = proposalCategories.find((item) => item.id === state.proposal.category);
+    const category = topics.find((item) => item.id === state.proposal.category);
     return `
       <h2 class="form-title">Step 4 - Review & confirm</h2>
       <div class="review-card">
@@ -934,15 +1119,14 @@ function onboardingStep1Screen() {
 
       <div class="ob-field">
         <label>Ton âge</label>
-        <div class="ob-age-row">
-          <button class="ob-age-btn" data-action="ob-age" data-dir="-1" type="button" aria-label="Diminuer l'âge">−</button>
-          <div>
-            <div class="ob-age-value" id="ob-age-display">${ob.age}</div>
-            <div class="ob-age-unit">ans</div>
-          </div>
+        <div class="ob-age-col">
           <button class="ob-age-btn" data-action="ob-age" data-dir="1" type="button" aria-label="Augmenter l'âge">+</button>
+          <input class="ob-age-value" id="ob-age-display" data-ob="age" type="number" min="13" max="99" maxlength="2" value="${ob.age}" inputmode="numeric" aria-label="Âge">
+          <button class="ob-age-btn" data-action="ob-age" data-dir="-1" type="button" aria-label="Diminuer l'âge">−</button>
+          <div class="ob-age-unit">ans</div>
         </div>
       </div>
+
     </div>
     <div class="ob-footer">
       <button class="ob-btn-primary" data-action="ob-next" type="button" id="ob-step1-next">Continuer ${icon('arrowRight', 18)}</button>
@@ -1133,7 +1317,7 @@ app.addEventListener("click", (event) => {
 
   if (action === "ob-age") {
     const dir = parseInt(target.dataset.dir, 10);
-    state.onboarding.age = Math.min(120, Math.max(13, state.onboarding.age + dir));
+    state.onboarding.age = Math.min(99, Math.max(13, state.onboarding.age + dir));
     render();
   }
 
@@ -1181,6 +1365,11 @@ app.addEventListener("click", (event) => {
 
   if (action === "filter") {
     state.activeFilter = target.dataset.filter;
+    render();
+  }
+
+  if (action === "sort") {
+    state.activeSort = target.dataset.sort;
     render();
   }
 
@@ -1269,7 +1458,7 @@ app.addEventListener("click", (event) => {
   }
 
   if (action === "proposal-publish") {
-    const category = proposalCategories.find((item) => item.id === state.proposal.category);
+    const category = topics.find((item) => item.id === state.proposal.category);
     const now = new Date();
     const dateStr = now.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
@@ -1307,7 +1496,12 @@ app.addEventListener("input", (event) => {
   // Onboarding inputs use data-ob attribute
   const obField = event.target.dataset.ob;
   if (obField) {
-    state.onboarding[obField] = event.target.value;
+    if (obField === "age") {
+      const val = parseInt(event.target.value, 10);
+      state.onboarding.age = isNaN(val) ? state.onboarding.age : Math.min(120, Math.max(13, val));
+    } else {
+      state.onboarding[obField] = event.target.value;
+    }
     return;
   }
 
